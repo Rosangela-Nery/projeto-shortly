@@ -1,7 +1,10 @@
 --Modelagem: https://dbdesigner.page.link/69sRXfQTUYdGUFrq7
 
-CREATE DATABASE "shortly"
 
+--Criando Banco de Dados:
+CREATE DATABASE "shortly";
+
+--Criando Tabelas
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
