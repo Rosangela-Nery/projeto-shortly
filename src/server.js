@@ -8,6 +8,7 @@ const server = express();
 server.use(cors());
 server.use(express.json());
 
-server.listen(5000, () => {
-    console.log("Sever open in 5000")
+const PORT = process.env.PORT || 5000
+server.listen(PORT, () => {
+    console.log(`Server open in: ${PORT}`)
 });
