@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { status_code } from '../enums/status.js';
-import { signUpSchema } from '../schemas/validationSchemas.js';
 import { connection } from '../pg/database.js';
+import { signUpSchema } from '../schemas/validationSchemas.js';
 
 async function signupPost(req, res) {
     const { name, email, password, confirmPassword } = req.body;
