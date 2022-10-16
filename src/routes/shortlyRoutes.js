@@ -5,7 +5,7 @@ import { signupValidation } from '../middlewares/shortlyMiddlewares.js';
 
 const router = express.Router();
 
-router.post("/signup", signupValidation, signupPost);
+router.post("/signup", signupPost);
 router.post("/signin", signinPost);
 
 export default router; 

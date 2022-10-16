@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import { v4 as uuid } from 'uuid';
 import { status_code } from '../enums/status.js';
 import { signInSchema } from '../schemas/validationSchemas.js';
 import { connection } from '../pg/database.js';
@@ -15,19 +16,29 @@ async function signinPost(req, res) {
             return res.send(status_code.unprocessable_entity);
         }
 
-        const encrypetPassword = bcrypt.hashSync(password, 12);
-
-        const verifiction = await connection.query(
-            `SELECT *
-            FROM 
-                users 
-            WHERE email = $1 and password = $2`, [email, encrypetPassword]
+        const verification = await connection.query(
+            `SELECT * FROM
+                users
+            WHERE email = $1 limit 1;`, [email]
         );
 
-        if(!verifiction) {
+        if(!(verification.rows).length) {
             res.status(status_code.unauthorized).send({"message": "Senha ou usuário inválidos, tente novamente!"});
             return;
         }
+
+        const encrypetPassword = await bcrypt.compare(password, verification.rows[0]?.password);
+
+        if(!encrypetPassword) {
+            res.status(status_code.unauthorized).send({"message": "Senha ou usuário inválidos, tente novamente!"});
+            return;
+        }
+
+        const token = uuid();
+        await connection.query(
+            `INSERT INTO 
+                sessions ("userId", token)
+            VALUES ($1, $2);`, [verification.rows[0]?.id, token]);
 
         return res.send(status_code.ok);
     } catch (error) {

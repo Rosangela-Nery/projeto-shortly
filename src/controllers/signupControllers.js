@@ -1,17 +1,18 @@
+import bcrypt from 'bcrypt';
 import { status_code } from '../enums/status.js';
 import { signUpSchema } from '../schemas/validationSchemas.js';
 import { connection } from '../pg/database.js';
 
 async function signupPost(req, res) {
-    const { name, email, password } = req.body;
+    const { name, email, password, confirmPassword } = req.body;
 
     try {
         const isValid = signUpSchema.validate({
-            name, email, password
+            name, email, password, confirmPassword
         });
 
         if(isValid.error) {
-            return res.send(status_code.unprocessable_entity);
+            return res.sendStatus(status_code.unprocessable_entity).send({"message": isValid.error});
         }
 
         const emailExist = await connection.query("SELECT * FROM users WHERE email=($1);", [email]);
@@ -21,9 +22,11 @@ async function signupPost(req, res) {
             return;
         }
 
-        await connection.query(`INSERT INTO users (name, email, password) VALUES ($1, $2, $3);`, [name, email, password]);
+        const encrypetPassword = await bcrypt.hash(password, 12);
 
-        return res.send(status_code.created);
+        await connection.query(`INSERT INTO users (name, email, password) VALUES ($1, $2, $3);`, [name, email, encrypetPassword]);
+
+        return res.sendStatus(status_code.created);
     } catch (error) {
         res.status(status_code.server_error).send(error.message);
     }
