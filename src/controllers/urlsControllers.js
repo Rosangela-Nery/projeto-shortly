@@ -51,7 +51,7 @@ async function urlsIdGet(req, res) {
 }
 
 async function urlsOpenGet(req, res) {
-    const { id, shortUrl } = req.params;
+    const { shortUrl } = req.params;
     try {
         const verificationUrl = await connection.query(`SELECT * FROM shortens WHERE "shortUrl" = $1;`, [shortUrl]);
 
@@ -59,18 +59,58 @@ async function urlsOpenGet(req, res) {
             res.status(status_code.not_found).send({"message": "A url encurtada não existe!"});
             return;
         }
+        console.log("111111: ", verificationUrl.rows)
 
-        const incrementUrl = await connection.query(
-            `INSERT INTO 
-                "shortens" 
-                "visitCount" = "visitCount" + 1
-            WHERE id = $1`, [id]
+        const increment = verificationUrl.rows[0].visitCount + 1;
+
+        await connection.query(
+            `UPDATE 
+                shortens 
+            SET 
+                "visitCount" = $1
+            WHERE id = $2`, [increment, verificationUrl.rows[0].id]
         );
 
-        res.redirect(incrementUrl);
+        console.log("222222: ",verificationUrl.rows[0].url)
+
+        // res.status(status_code.ok);
+        res.redirect(verificationUrl.rows[0].url);
     } catch (error) {
         res.status(status_code.server_error).send(error.message);
     }
 }
 
-export { urlsPost, urlsIdGet, urlsOpenGet };
+async function urlsDelete(req, res) {
+    const { id } = req.params;
+    const { idUser } = req.body;
+
+    try {
+        const verificationIdUrl = await connection.query(
+            `SELECT * FROM 
+                shortens
+            WHERE id = $1;`, [id]
+        );
+
+        if(!(verificationIdUrl.rows).length) {
+            res.status(status_code.not_found).send({"message": "A url encurtada não existe!"});
+            return;
+        }
+
+        if(idUser != verificationIdUrl.rows[0].userId) {
+            res.status(status_code.unauthorized).send({"message": "Não é permitido excluir a url de outro usuário!"});
+            return;
+        }
+
+        await connection.query(
+            `DELETE FROM 
+                shortens
+            WHERE id = $1;`, [id]
+        );
+
+        res.status(status_code.no_content).send({"message": "URL encurtada excluída com sucesso!"});
+    } catch (error) {
+        res.status(status_code.server_error).send(error.message);
+    }
+}
+
+export { urlsPost, urlsIdGet, urlsOpenGet, urlsDelete };

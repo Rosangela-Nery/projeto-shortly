@@ -40,7 +40,7 @@ async function signinPost(req, res) {
                 sessions ("userId", token)
             VALUES ($1, $2);`, [verification.rows[0]?.id, token]);
 
-        return res.send(status_code.ok);
+        return res.send({token});
     } catch (error) {
         res.status(status_code.server_error).send(error.message);
     }

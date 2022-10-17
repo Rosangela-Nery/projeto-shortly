@@ -2,9 +2,16 @@ import { connection } from '../pg/database.js';
 import { status_code } from '../enums/status.js';
 
 async function isAuthenticated(req, res, next) {
-    const { token } = req.headers;
+    const { authorization  } = req.headers;
 
     try {
+        const token = authorization?.replace('Bearer ', '');
+
+        if(!token) {
+            res.status(status_code.unauthorized).send({"message": "Header não enviado ou inválido"});
+            return;
+        }
+
         const authenticated = await connection.query(
             `SELECT * FROM 
                 sessions 
@@ -38,7 +45,7 @@ async function hasUser(req, res, next) {
             [idUser]);
 
             if(!(isUser.rows).length) {
-                res.status(status_code.unauthorized).send({"message": "Não tem usuário cadastrado!"});
+                res.status(status_code.not_found).send({"message": "Não tem usuário cadastrado!"});
                 return;
             }
 
