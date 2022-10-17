@@ -18,8 +18,6 @@ async function rankingGet(req, res) {
             LIMIT 10;`
         );
 
-        console.log("Reply: ", ranking.rows)
-
         res.status(status_code.ok).send(ranking.rows)
     } catch (error) {
         res.status(status_code.server_error).send(error.message);
