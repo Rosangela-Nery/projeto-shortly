@@ -4,6 +4,7 @@ import { signinPost } from '../controllers/signinControllers.js';
 import { isAuthenticated, hasUser } from '../middlewares/shortlyMiddlewares.js';
 import { urlsPost, urlsIdGet, urlsOpenGet, urlsDelete } from '../controllers/urlsControllers.js';
 import { usersGet } from '../controllers/usersControllers.js';
+import { rankingGet } from '../controllers/ranking.js';
 
 const router = express.Router();
 
@@ -17,7 +18,7 @@ router.delete("/urls/:id", [isAuthenticated, hasUser], urlsDelete);
 
 router.get("/users/me", [isAuthenticated, hasUser],usersGet);
 
-router.get("/ranking");
+router.get("/ranking", rankingGet);
 
 
 export default router; 

@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid/non-secure';
 import { customAlphabet } from 'nanoid';
 import { status_code } from '../enums/status.js';
 import { connection } from '../pg/database.js';
@@ -59,7 +58,6 @@ async function urlsOpenGet(req, res) {
             res.status(status_code.not_found).send({"message": "A url encurtada não existe!"});
             return;
         }
-        console.log("111111: ", verificationUrl.rows)
 
         const increment = verificationUrl.rows[0].visitCount + 1;
 
@@ -70,8 +68,6 @@ async function urlsOpenGet(req, res) {
                 "visitCount" = $1
             WHERE id = $2`, [increment, verificationUrl.rows[0].id]
         );
-
-        console.log("222222: ",verificationUrl.rows[0].url)
 
         // res.status(status_code.ok);
         res.redirect(verificationUrl.rows[0].url);
